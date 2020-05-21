@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+    <!-- title and standard meta usage -->
+    <title>Weather Dashboard</title>
+    <meta charset="UTF-8" />
+    <meta name="description" content="A weather dashboard that displays weather for city searched and keeps local history." />
+    <meta name="keywords" content="weather,dashboard,temperature,humidity,wind" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- lib includes -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <link
+        rel="stylesheet" 
+        href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" 
+    />
+    <link 
+        rel="stylesheet"
+        href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+        integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf"
+        crossorigin="anonymous"
+    />
+
+    <!-- personal style sheet -->
+    <link rel="stylesheet" href="styling/style.css" />
+</head>
+
+<body>
+
+    <!-- header -->
+    <header class="text-center p-3 bg-dark text-light">
+        <h1>Weather Dashboard</h1>
+    </header>
+
+    <!-- wrapper and row -->
+    <div class="content d-flex mb-4">
+        <div class="row" style="width:100%;">
+            
+            <!-- search bar and history column-->
+            <aside class="col-sm-4 bg-light">
+                <div class="p-3" >
+                    <div class="input-group mb-4">
+                        <input class="form-control py-2" type="search" id="search" placeholder="Search for a City...">
+                        <span class="input-group-append">
+                            <button class="btn btn-outline-secondary" type="button" id="search_submit">
+                                <i class="fa fa-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                    <ul class="list-group" id="search_history">
+                        <!-- javascript build using: <li class="list-group-item">CITY</li> -->
+                    </ul>
+                </div>
+            </aside>
+
+            <!-- weather data column -->
+            <main class="col-sm-8 bg-white pt-2">
+                <!-- today data-->
+                <section class="card mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title">City Name (DATE) ICON</h4>
+                        <div class="mb-2">Temperature:&nbsp;<span id="temp-data">N/A</span></div>
+                        <div class="mb-2">Humidity:&nbsp;<span id="humid-data">N/A</span></div>
+                        <div class="mb-2">Wind Speed:&nbsp;<span id="speed-data">N/A</span></div>
+                        <div class="mb-2">UV Index:&nbsp;<span id="uv-data">N/A</span></div>
+                    </div>
+                </section>
+
+                <!-- 5 day data -->
+                <section>
+                    <h4>5-Day Forcast:</h4>
+                    <div class="card-deck text-light">
+                        <div class="card bg-primary"><div class="card-body 5d">
+                            <h5 class="card-title"><span>DATE</span></h5>
+                            <div class="mb-2"><span>ICON</span></div>
+                            <div class="mb-2">TEMP:&nbsp;<span>N/A</span></div>
+                            <div class="mb-2">HUM:&nbsp;<span>N/A</span></div>
+                        </div></div>
+                        <div class="card bg-primary"><div class="card-body 5d">
+                            <h5 class="card-title"><span>DATE</span></h5>
+                            <div class="mb-2"><span>ICON</span></div>
+                            <div class="mb-2">TEMP:&nbsp;<span>N/A</span></div>
+                            <div class="mb-2">HUM:&nbsp;<span>N/A</span></div>
+                        </div></div>
+                        <div class="card bg-primary"><div class="card-body 5d">
+                            <h5 class="card-title"><span>DATE</span></h5>
+                            <div class="mb-2"><span>ICON</span></div>
+                            <div class="mb-2">TEMP:&nbsp;<span>N/A</span></div>
+                            <div class="mb-2">HUM:&nbsp;<span>N/A</span></div>
+                        </div></div>
+                        <div class="card bg-primary"><div class="card-body 5d">
+                            <h5 class="card-title"><span>DATE</span></h5>
+                            <div class="mb-2"><span>ICON</span></div>
+                            <div class="mb-2">TEMP:&nbsp;<span>N/A</span></div>
+                            <div class="mb-2">HUM:&nbsp;<span>N/A</span></div>
+                        </div></div>
+                        <div class="card bg-primary"><div class="card-body 5d">
+                            <h5 class="card-title"><span>DATE</span></h5>
+                            <div class="mb-2"><span>ICON</span></div>
+                            <div class="mb-2">TEMP:&nbsp;<span>N/A</span></div>
+                            <div class="mb-2">HUM:&nbsp;<span>N/A</span></div>
+                        </div></div>
+                    </div>
+            </main>
+
+        </div>
+    </div>
+
+    <!-- footer  -->
+    <footer class="text-center fixed-bottom">
+        Shane Koehler
+    </footer> 
+
+    <!-- my scripts -->
+    <script src="func.js"></script>
+    <script src="main.js"></script>
+
+</body>
+
+</html>
