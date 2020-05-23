@@ -1,3 +1,11 @@
+/*
+    was going to use the daily feature with total of
+    16 dates daily with a count of 5 but nooo paid
+    acct only so doing 5day/3hour forecast, if checking
+    at night, the last forecast date will show over night
+    data, the price we pay for freedom
+*/
+
 // enum for our weather type
 const weatherType = Object.freeze({w:"weather", f:"forecast", uv:"uvi"});
 
@@ -7,23 +15,20 @@ function query_openWeather(location, type = weatherType.w)
     // check preg match for location?
     if (!location) return;
 
-    console.log(location);
-
     // set some vars
-    var baseURL = "https://api.openweathermap.org/data/2.5/" + type + "?";
-    var locString = "q=" + location;
+    var baseURL = "https://api.openweathermap.org/data/2.5/" + type;
+    var locString = "?q=" + location;
     var idString = "&appid=63fcd26d5c46805bb3b2f66afa3154da";
 
-    // special circumstance
+    // special circumstances
     if (type == weatherType.uv)
     {
-        // needs lat/lon
-        // convert location
+        // split location since should be passed as lat,lon with uv
         var loc = location.split(",");
         if (loc.length != 2) return;
 
         // set new loc string by lat/lon
-        locString = "&lat=" + loc[0] + "&lon=" + loc[1];
+        locString = "?lat=" + loc[0] + "&lon=" + loc[1];
     }
 
     // build url
@@ -38,7 +43,7 @@ function query_openWeather(location, type = weatherType.w)
         // DEBUG
         console.log(res);
 
-        // handle callback type
+        // handle correct callback type
         switch (type)
         {
             case weatherType.w:
@@ -46,7 +51,7 @@ function query_openWeather(location, type = weatherType.w)
                 query_openWeather(res.coord.lat + "," + res.coord.lon, weatherType.uv);
 
                 // callback for current weather
-                cb_curWeather(res); 
+                cb_weather(res);
                 break;
 
             case weatherType.f: cb_forecast(res); break;
@@ -59,12 +64,12 @@ function query_openWeather(location, type = weatherType.w)
  * 
  * @param {object} data 
  */
-function cb_curWeather(data)
+function cb_weather(data)
 {
     currentCityElm.text( data.name );
     currentDateElm.text( _formatUnixDT(data.dt) );
     currentIconElm.attr("src", "http://openweathermap.org/img/w/" + data.weather[0].icon + ".png" );
-    currentTempElm.text( _convertKtoF(data.main.temp) +" F" );
+    currentTempElm.html( _convertKtoF(data.main.temp) +" &#8457;" );
     currentHumidElm.text( data.main.humidity + " %" );
     currentSpeedElm.text( data.wind.speed +" MPH" );
 }
@@ -75,9 +80,6 @@ function cb_curWeather(data)
  */
 function cb_forecast(data)
 {
-    console.log("forecast");
-    // put right data into right spaces
-
     // get all spans nested within all 5d class elements
     // can't just do one by one, either i'm dumb or jquery is.. hmmmm :\
     var spans = fiveDayElms.find( "span" );
@@ -85,18 +87,38 @@ function cb_forecast(data)
     // so since i'm dumb, split spans into chunks of 4
     var chunks = [];
     while (spans.length > 0)
-        chunks.push(spans.splice(0, 4));
+        chunks.push( spans.splice(0, 4) );
 
-    // go through each chunk
-    // indexes.. 0 = date, 1 = icon, 2 = temp, 3 = hum
-    for (let i = 0; i < chunks.length; i++) 
+    // get and format current date into holdDate for compare
+    var holdDate = moment().format("YYYY-MM-DD");
+    var currentChunk = 0;
+
+    // loop through all our future data (goes by 3 hours it seems)
+    for (let i = 0; i < data.list.length; i++) 
     {
-        var curObj = data.list[(i+1)]; // 0 is current day, start with next day
+        // set obj for readability
+        var curObj = data.list[i];
 
-        chunks[i][0].textContent = _formatUnixDT(curObj.dt); // date
-        chunks[i][1].firstElementChild.src = "http://openweathermap.org/img/w/" + curObj.weather[0].icon + ".png"; // icon
-        chunks[i][2].textContent = _convertKtoF(curObj.main.temp) + " F"; // temp
-        chunks[i][3].textContent = curObj.main.humidity + " %"; // hum
+        // split looked at obj date into date/time
+        var splitDate = curObj.dt_txt.split(" ");
+
+        // see if looked at date is after now/today's date
+        if ( moment(splitDate[0]).isAfter(holdDate)
+            && ( splitDate[1] == "12:00:00" // get noon data OR
+                || i == (data.list.length-1) ) // never made it to noon data on last, just get whatever is left
+        ) {
+            // set next day data into chunk elements
+            // indexes.. 0 = date, 1 = icon, 2 = temp, 3 = hum
+            chunks[currentChunk][0].textContent = _formatUnixDT(curObj.dt); // date
+            chunks[currentChunk][1].firstElementChild.src = "http://openweathermap.org/img/w/" + curObj.weather[0].icon + ".png"; // icon
+            chunks[currentChunk][2].innerHTML = _convertKtoF(curObj.main.temp) + " &#8457;"; // temp
+            chunks[currentChunk][3].textContent = curObj.main.humidity + " %"; // hum 
+
+            // increase current chunk index and set new hold date
+            currentChunk ++;
+            holdDate = splitDate[0];
+        }
+        
     }
 }
 
@@ -118,7 +140,7 @@ function cb_uvi(data)
 
     // set styles and text
     currentUVElm.attr("style", "background-color:"+color+";");
-    currentUVElm.addClass("text-white p-1 rounded");
+    currentUVElm.addClass("text-white p-1 rounded"); // bootstrap
     currentUVElm.text(uv);
 }
 
