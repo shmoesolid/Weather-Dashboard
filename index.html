@@ -40,15 +40,16 @@
             
             <!-- search bar and history column-->
             <aside class="col-sm-4 bg-light">
-                <div class="p-3" >
+                <div class="p-2" >
                     <div class="input-group mb-4">
-                        <input class="form-control py-2" type="search" id="search" placeholder="Search for a City...">
+                        <input class="form-control py-2" type="search" id="search" placeholder="Your city name...">
                         <span class="input-group-append">
                             <button class="btn btn-outline-secondary" type="button" id="search_submit">
                                 <i class="fa fa-search"></i>
                             </button>
                         </span>
                     </div>
+                    <div id="search_status"></div>
                     <ul class="list-group" id="search_history">
                         <!-- javascript build using: <li class="list-group-item">CITY</li> -->
                     </ul>
@@ -117,9 +118,11 @@
     </footer> 
 
     <!-- my scripts -->
+    <script src="js/func_util.js"></script>
     <script src="js/prelem.js"></script>
     <script src="js/func_weather.js"></script>
     <script src="js/func_listeners.js"></script>
+    <script src="js/func_history.js"></script>
     <script src="js/main.js"></script>
 
 </body>

@@ -3,13 +3,22 @@
  */
 
 // enum for our weather type
-// leaving weather in for lat/lon coords for city search
-const weatherType = Object.freeze({w:"weather", oc:"onecall"});
+// leaving weather in for lat/lon coords for city search since oc can't handle city, only lat/lon
+const WEATHER_TYPE = Object.freeze({w:"weather", oc:"onecall"});
 
-// function for ajax
-function query_openWeather(location, type = weatherType.w, ocCity="")
+/////////////////////////////////////////////////////////////////////////
+/**
+ * 
+ * @param {string} location 
+ * @param {enum} type 
+ * @param {string} ocCity 
+ */
+function query_openWeather(location, type = WEATHER_TYPE.w, ocCity="", shiftHistory=true)
 {
-    // check preg match for location?
+    // DEBUG
+    //console.log(location);
+
+    // check empty
     if (!location) return;
 
     // set some vars
@@ -19,7 +28,7 @@ function query_openWeather(location, type = weatherType.w, ocCity="")
     var ocExcludeString = "";
 
     // special circumstances (oc seems to take only lat/lon)
-    if (type == weatherType.oc)
+    if (type == WEATHER_TYPE.oc)
     {
         // split location since should be passed as lat,lon with uv
         var loc = location.split(",");
@@ -34,40 +43,79 @@ function query_openWeather(location, type = weatherType.w, ocCity="")
     var queryURL = baseURL + locString + ocExcludeString + idString;
 
     // our ajax call
-    $.ajax({
+    $.ajax(
+    {
         url: queryURL,
         method: "GET"
-    }).then(function(res) {
+    }).then(function(res) 
+    {
+        // DEBUG
+        //console.log(res);
+
+        // empty search status/error if any
+        searchStatusElm.text("");
 
         // handle correct callback type
         switch (type)
         {
-            case weatherType.w: cb_weather(res); break;
-            case weatherType.oc: cb_oneCall(res, ocCity); break;
+            case WEATHER_TYPE.w: cb_weather(res, shiftHistory); break;
+            case WEATHER_TYPE.oc: cb_oneCall(res, ocCity, shiftHistory); break;
         }
+
+    }).fail(function(res)
+    {
+        searchStatusElm.text("Search failed.. Try entering a city name only or maybe an actual city.  Contact site admin if still having issues.");
     });
 }
 
+/** search weather by location from IP
+ * 
+ */
+function searchByIP()
+{
+    // run ajax call
+    $.ajax({
+
+        dataType: "json",
+        url: "https://ipapi.co/json/",
+        
+        success: function(data)
+        {
+            // DEBUG
+            //console.log(data);
+
+            // get weather by city data
+            query_openWeather(data.city);
+        }
+
+    });
+}
+
+/////////////////////////////////////////////////////////////////////////
 /** callback original just to get lat/lon of city really
  * 
  * @param {object} data 
  */
-function cb_weather(data)
+function cb_weather(data, shiftHistory=true)
 {
     // get open call by lat/lon of city (for daily)
-    query_openWeather(data.coord.lat + "," + data.coord.lon, weatherType.oc, data.name);
+    query_openWeather(data.coord.lat + "," + data.coord.lon, WEATHER_TYPE.oc, data.name, shiftHistory);
 }
 
+/////////////////////////////////////////////////////////////////////////
 /** callback for onecall...
  * 
  * @param {object} data 
  * @param {string} cityName 
  */
-function cb_oneCall(data, cityName)
+function cb_oneCall(data, cityName, shiftHistory=true)
 {
     // DEBUG
     //console.log(cityName);
     //console.log(data);
+
+    // update storage vars
+    if (shiftHistory) updateSearchHistory(cityName);
 
     // HANDLE CURRENT WEATHER DATA *************************************
     currentCityElm.text( cityName );
@@ -110,6 +158,7 @@ function cb_oneCall(data, cityName)
 
         // set next day data into chunk elements
         // indexes.. 0 = date, 1 = icon, 2 = temp, 3 = hum
+        // (can't use jQuery here for some reason, i'll look into later)
         chunks[i][0].textContent = _formatUnixDT(curObj.dt); // date
         chunks[i][1].firstElementChild.src = "http://openweathermap.org/img/w/" + curObj.weather[0].icon + ".png"; // icon
         chunks[i][2].innerHTML = _convertKtoF(curObj.temp.day) + " &#8457;"; // temp
@@ -118,6 +167,7 @@ function cb_oneCall(data, cityName)
     }
 }
 
+/////////////////////////////////////////////////////////////////////////
 /** converts unix datetime into formatted date
  * 
  * @param {int} dt 
@@ -128,6 +178,7 @@ function _formatUnixDT(dt)
     return d.getMonth() +"/"+ d.getDate() +"/"+ String(d.getFullYear()).slice(-2);
 }
 
+/////////////////////////////////////////////////////////////////////////
 /** basic tempurature conversions
  * 
  */
@@ -145,10 +196,10 @@ and how i can't read and how much extra work i did for no reason
 *****************************************************************************
 
 // enum for our weather type
-const weatherType = Object.freeze({w:"weather", f:"forecast", uv:"uvi", oc:"onecall"});
+const WEATHER_TYPE = Object.freeze({w:"weather", f:"forecast", uv:"uvi", oc:"onecall"});
 
 // function for ajax
-function query_openWeather(location, type = weatherType.w)
+function query_openWeather(location, type = WEATHER_TYPE.w)
 {
     // check preg match for location?
     if (!location) return;
@@ -159,7 +210,7 @@ function query_openWeather(location, type = weatherType.w)
     var idString = "&appid=63fcd26d5c46805bb3b2f66afa3154da";
 
     // special circumstances
-    if (type == weatherType.uv || type == weatherType.oc)
+    if (type == WEATHER_TYPE.uv || type == WEATHER_TYPE.oc)
     {
         // split location since should be passed as lat,lon with uv
         var loc = location.split(",");
@@ -184,10 +235,10 @@ function query_openWeather(location, type = weatherType.w)
         // handle correct callback type
         switch (type)
         {
-            case weatherType.w: cb_weather(res); break;
-            case weatherType.f: cb_forecast(res); break;
-            case weatherType.uv: cb_uvi(res); break;
-            case weatherType.oc: cb_oneCall(res); break;
+            case WEATHER_TYPE.w: cb_weather(res); break;
+            case WEATHER_TYPE.f: cb_forecast(res); break;
+            case WEATHER_TYPE.uv: cb_uvi(res); break;
+            case WEATHER_TYPE.oc: cb_oneCall(res); break;
         }
     });
 }
@@ -201,8 +252,8 @@ function cb_oneCall(data)
 function cb_weather(data)
 {
     // get uv index separate from lat/lon
-    //query_openWeather(data.coord.lat + "," + data.coord.lon, weatherType.uv);
-    query_openWeather(data.coord.lat + "," + data.coord.lon, weatherType.oc);
+    //query_openWeather(data.coord.lat + "," + data.coord.lon, WEATHER_TYPE.uv);
+    query_openWeather(data.coord.lat + "," + data.coord.lon, WEATHER_TYPE.oc);
 
     // put data into weather stuff
     currentCityElm.text( data.name );
