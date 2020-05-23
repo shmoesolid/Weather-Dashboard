@@ -1,3 +1,7 @@
+/** handles preleminary references/globals
+ * 
+ */
+
 // get search elements
 var searchElm = $('#search');
 var searchSubmitElm = $('#search_submit');
