@@ -7,7 +7,7 @@
 const WEATHER_TYPE = Object.freeze({w:"weather", oc:"onecall"});
 
 /////////////////////////////////////////////////////////////////////////
-/**
+/** open weather api call
  * 
  * @param {string} location 
  * @param {enum} type 
@@ -191,8 +191,8 @@ function _convertKtoC(kTemp) { return kTemp - 273.15; }
 
 
 /******************************************************************************
-leaving all this below garbage to remind myself how stupid i am
-and how i can't read and how much extra work i did for no reason
+leaving all this below garbage to remind myself how i can't 
+read and how much extra work i did for no reason
 *****************************************************************************
 
 // enum for our weather type
